@@ -121,6 +121,5 @@ sleep 3
 
 apt-get install jitsi-meet-tokens -y
 
-echo "Jitsi-meet-server has been deployed"
-echo "Script has ended and done"
+echo "--------------------------- Script completed ---------------------------"
 
