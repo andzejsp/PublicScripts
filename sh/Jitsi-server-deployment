@@ -7,6 +7,8 @@ if [ `whoami` != 'root' ]
     exit
 fi
 # Set user CVARS
+echo "--------------------------- Set user CVARS ---------------------------"
+sleep 3
 # Get user FQDN 
 FQDN=$(whiptail --nocancel --title "Enter FQDN or ip" --inputbox "Enter your FQDN or ip and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
 # Do a quick check
