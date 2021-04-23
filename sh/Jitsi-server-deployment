@@ -1,22 +1,40 @@
 #!/bin/bash
-# CVARS
-# FQDN
+
 # Check if root
 if [ `whoami` != 'root' ]
   then
     echo "You must be root to do this."
     exit
 fi
-
+# Set user CVARS
 # Get user FQDN 
-FQDN=$(whiptail --nocancel --title "Enter FQDN or ip to use for this machine" --inputbox "Enter your FQDN and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+FQDN=$(whiptail --nocancel --title "Enter FQDN or ip" --inputbox "Enter your FQDN or ip and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+# Do a quick check
+if [ -z "$FQDN" ]
+then
+      echo "FQDN  was empty - Exit"
+	  exit
+fi
+
 # Get user jitsi token app-id
-JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID or ip to use for this machine" --inputbox "Enter Jitsi-token APP ID or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
+JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID " --inputbox "Enter Jitsi-token APP ID  to use for this machine" 10 60 3>&1 1>&2 2>&3)
+# Do a quick check
+if [ -z "$JAPPID" ]
+then
+      echo "Jitsi-Token-App-id  was empty - Exit"
+	  exit
+fi
+
 # Get user jitsi token app-secret
-JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret or ip to use for this machine" --inputbox "Enter Jitsi-token APP secret or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
+JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret" --inputbox "Enter Jitsi-token APP secret to use for this machine" 10 60 3>&1 1>&2 2>&3)
+# Do a quick check
+if [ -z "$JSECRET" ]
+then
+      echo "Jitsi-Token-App-secret was empty - Exit"
+	  exit
+fi
 
-
-# set DEBCONFS
+# set DEBCONFS with CVARS
 echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string $FQDN" | debconf-set-selections
 echo "jitsi-meet jitsi-meet/cert-choice select I want to use my own certificate" | debconf-set-selections
 echo "jitsi-meet jitsi-meet/cert-path-crt string /etc/ssl/$FQDN.crt" | debconf-set-selections
@@ -101,6 +119,6 @@ sleep 3
 
 apt-get install jitsi-meet-tokens -y
 
-echo "done"
-echo "done"
+echo "Jitsi-meet-server has been deployed"
+echo "Script has ended and done"
 
