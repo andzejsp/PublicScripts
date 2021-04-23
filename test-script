@@ -1,5 +1,7 @@
 #!/bin/bash
 # declare STRING variable
 STRING="Hello World"
+lol="asdas"
 #print variable on a screen
 echo $STRING
+echo $lol
