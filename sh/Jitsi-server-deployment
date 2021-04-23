@@ -10,36 +10,10 @@ fi
 
 # Get user FQDN 
 FQDN=$(whiptail --nocancel --title "Enter FQDN or ip to use for this machine" --inputbox "Enter your FQDN and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
-
-exitstatus=$?
-if [ $exitstatus = 0 ]; then
-#    echo "Your password is:" $PASSWORD
-else
-    echo "You chose to Cancel."
-	exit
-fi
-
+# Get user jitsi token app-id
 JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID or ip to use for this machine" --inputbox "Enter Jitsi-token APP ID or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
-
-exitstatus=$?
-if [ $exitstatus = 0 ]; then
-#    echo "Your password is:" $PASSWORD
-else
-    echo "You chose to Cancel."
-	exit
-fi
-
+# Get user jitsi token app-secret
 JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret or ip to use for this machine" --inputbox "Enter Jitsi-token APP secret or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
-
-exitstatus=$?
-if [ $exitstatus = 0 ]; then
-#    echo "Your password is:" $PASSWORD
-else
-    echo "You chose to Cancel."
-	exit
-fi
-
-
 
 #UPDATE PACKAGES
 apt update &&
@@ -123,4 +97,3 @@ apt-get install jitsi-meet-tokens -y
 
 done
 done
-
