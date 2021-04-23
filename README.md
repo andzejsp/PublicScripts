@@ -3,7 +3,7 @@ My personal scripts for public use
 
 
 Just a reminder for myself
-`curl -s <URL-to-your-file> |sh`
+`curl -s <URL-to-your-file> |bash`
 
 # Local test server scripts
 ### Servers without domain or SSL/ with local-network self signed certs
