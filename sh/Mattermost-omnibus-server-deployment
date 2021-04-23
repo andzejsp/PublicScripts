@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Check if root
+if [ `whoami` != 'root' ]
+  then
+    echo "You must be root to do this."
+    exit
+fi
+
+# Purge old version - delete all - mattermost-omnibus and DB
+echo "--------------------------- Purge old version - delete all - mattermost-omnibus and DB ---------------------------"
+sleep 3
+apt remove --purge mattermost mattermost-omnibus -y &&
+apt-get --purge remove postgresql\* -y &&
+
+# Set user CVARS
+echo "--------------------------- Set user CVARS ---------------------------"
+sleep 3
+# Get user FQDN 
+FQDN=$(whiptail --nocancel --title "Enter FQDN or ip" --inputbox "Enter your FQDN or ip and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+# Do a quick check
+if [ -z "$FQDN" ]
+then
+      echo "FQDN  was empty - Exit"
+	  exit
+fi
+
+# set DEBCONFS with nothing - no SSL no domain = local use
+echo "mattermost-omnibus mattermost-omnibus/domain string " | debconf-set-selections
+echo "mattermost-omnibus mattermost-omnibus/email string " | debconf-set-selections
+
+# Grab some packages
+
+curl -o- https://deb.packages.mattermost.com/repo-setup.sh | sudo bash
+
+# Install mattermost-omnibus - If you’re installing Omnibus, and don't have a domain and SSL:
+echo "--------------------------- Install mattermost-omnibus no HTTPS ---------------------------"
+sleep 3
+MMO_HTTPS=false apt install mattermost-omnibus -y
+
+# Reconfigure omnibus -  enable plugin uploads
+echo "--------------------------- Reconfigure omnibus ---------------------------"
+sleep 3
+sed -i "s/^\(fqdn\s*:\s*\).*\$/\1$FQDN/" /etc/mattermost/mmomni.yml &&
+sed -i "s/^\(https\s*:\s*\).*\$/\1false/" /etc/mattermost/mmomni.yml &&
+sed -i "s/^\(enable_plugin_uploads\s*:\s*\).*\$/\1true/" /etc/mattermost/mmomni.yml &&
+sed -i "s/^\(email\s*:\s*\).*\$/\1test-user@no-server.some-unn/" /etc/mattermost/mmomni.yml &&
+
+
+echo "--------------------------- Restart mattermost-omnibus ---------------------------"
+sleep 3
+
+mmomni reconfigure
+
+echo "--------------------------- Script completed ---------------------------"
