@@ -13,11 +13,33 @@ FQDN=$(whiptail --nocancel --title "Enter FQDN or ip to use for this machine" --
 
 exitstatus=$?
 if [ $exitstatus = 0 ]; then
-    echo "Your password is:" $PASSWORD
+#    echo "Your password is:" $PASSWORD
 else
     echo "You chose to Cancel."
 	exit
 fi
+
+JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID or ip to use for this machine" --inputbox "Enter Jitsi-token APP ID or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
+
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+#    echo "Your password is:" $PASSWORD
+else
+    echo "You chose to Cancel."
+	exit
+fi
+
+JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret or ip to use for this machine" --inputbox "Enter Jitsi-token APP secret or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
+
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+#    echo "Your password is:" $PASSWORD
+else
+    echo "You chose to Cancel."
+	exit
+fi
+
+
 
 #UPDATE PACKAGES
 apt update &&
@@ -47,6 +69,10 @@ echo "--------------------------- INSTALLING JITSI-MEET ------------------------
 sleep 3
 echo "--------------------------- Remember to choose self signed certs ---------------------------"
 sleep 3
+echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string $FQDN" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-choice select I want to use my own certificate" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-path-crt string /etc/ssl/$FQDN.crt" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-path-key string /etc/ssl/$FQDN.key" | debconf-set-selections
 apt install jitsi-meet -y &&
 
 # setup jitsi tokens
@@ -90,6 +116,9 @@ echo "--------------------------- INSTALLING JITSI-MEET-TOKENS -----------------
 sleep 3
 echo "--------------------------- Remember app_id and secret ---------------------------"
 sleep 3
+echo "jitsi-meet-tokens/appsecret password $JSECRET" | debconf-set-selections
+echo "jitsi-meet-tokens/appid string $JAPPID" | debconf-set-selections
+
 apt-get install jitsi-meet-tokens -y
 
 done
