@@ -15,10 +15,19 @@ JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID or ip to use for 
 # Get user jitsi token app-secret
 JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret or ip to use for this machine" --inputbox "Enter Jitsi-token APP secret or ip to use for this machine" 10 60 3>&1 1>&2 2>&3)
 
+
+# set DEBCONFS
+echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string $FQDN" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-choice select I want to use my own certificate" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-path-crt string /etc/ssl/$FQDN.crt" | debconf-set-selections
+echo "jitsi-meet jitsi-meet/cert-path-key string /etc/ssl/$FQDN.key" | debconf-set-selections
+
+echo "jitsi-meet-tokens jitsi-meet-tokens/appid string $JAPPID" | debconf-set-selections
+echo "jitsi-meet-tokens jitsi-meet-tokens/appsecret string $JSECRET" | debconf-set-selections
+
 #UPDATE PACKAGES
 apt update &&
 apt install apt-transport-https -y &&
-apt install curl -y &&
 curl https://download.jitsi.org/jitsi-key.gpg.key | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/jitsi-keyring.gpg' 
 echo 'deb [signed-by=/usr/share/keyrings/jitsi-keyring.gpg] https://download.jitsi.org stable/' | sudo tee /etc/apt/sources.list.d/jitsi-stable.list > /dev/null
 
@@ -34,22 +43,23 @@ ufw allow 5222/tcp &&
 printf 'y'|ufw enable
 
 #CREATE CERTS for IP - FQDN
+echo "--------------------------- GENERATE my own certs ---------------------------"
+sleep 3
+
 openssl req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout /etc/ssl/$FQDN.key -out  /etc/ssl/$FQDN.pem -subj "/C=US/CN=Example-Root-CA" &&
 openssl x509 -outform pem -in /etc/ssl/$FQDN.pem -out /etc/ssl/$FQDN.crt &&
 
 # Install JITSI
 apt update &&
-echo "--------------------------- INSTALLING JITSI-MEET ---------------------------"
+echo "--------------------------- INSTALLING JITSI-MEET with my own certs ---------------------------"
 sleep 3
-echo "--------------------------- Remember to choose self signed certs ---------------------------"
-sleep 3
-echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string $FQDN" | debconf-set-selections
-echo "jitsi-meet jitsi-meet/cert-choice select I want to use my own certificate" | debconf-set-selections
-echo "jitsi-meet jitsi-meet/cert-path-crt string /etc/ssl/$FQDN.crt" | debconf-set-selections
-echo "jitsi-meet jitsi-meet/cert-path-key string /etc/ssl/$FQDN.key" | debconf-set-selections
+
 apt install jitsi-meet -y &&
 
-# setup jitsi tokens
+# Install lua stuff and prosody
+echo "--------------------------- Install lua stuff and prosody ---------------------------"
+sleep 3
+
 cd &&
 apt-get update -y &&
 apt-get install gcc -y &&
@@ -80,7 +90,7 @@ chmod 644 /etc/prosody/certs/$FQDN.key &&
 sleep 2 &&
 
 #Copy generadet CERTS to prosody
-echo "--------------------------- Copy generadet CERTS to prosody ---------------------------"
+echo "--------------------------- Copy generated CERTS to prosody ---------------------------"
 sleep 3
 cp /etc/ssl/$FQDN.crt /etc/prosody/certs/$FQDN.crt
 cp /etc/ssl/$FQDN.key /etc/prosody/certs/$FQDN.key
@@ -88,12 +98,9 @@ cp /etc/ssl/$FQDN.key /etc/prosody/certs/$FQDN.key
 ## install jitsi tokens for real
 echo "--------------------------- INSTALLING JITSI-MEET-TOKENS ---------------------------"
 sleep 3
-echo "--------------------------- Remember app_id and secret ---------------------------"
-sleep 3
-echo "jitsi-meet-tokens/appsecret password $JSECRET" | debconf-set-selections
-echo "jitsi-meet-tokens/appid string $JAPPID" | debconf-set-selections
 
 apt-get install jitsi-meet-tokens -y
 
-done
-done
+echo "done"
+echo "done"
+
