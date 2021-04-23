@@ -1,0 +1,97 @@
+#!/bin/bash
+# CVARS
+# FQDN
+# Check if root
+if [ `whoami` != 'root' ]
+  then
+    echo "You must be root to do this."
+    exit
+fi
+
+# Get user FQDN 
+FQDN=$(whiptail --nocancel --title "Enter FQDN or ip to use for this machine" --inputbox "Enter your FQDN and choose Ok to continue." 10 60 3>&1 1>&2 2>&3)
+
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+    echo "Your password is:" $PASSWORD
+else
+    echo "You chose to Cancel."
+	exit
+fi
+
+#UPDATE PACKAGES
+apt update &&
+apt install apt-transport-https -y &&
+apt install curl -y &&
+curl https://download.jitsi.org/jitsi-key.gpg.key | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/jitsi-keyring.gpg' 
+echo 'deb [signed-by=/usr/share/keyrings/jitsi-keyring.gpg] https://download.jitsi.org stable/' | sudo tee /etc/apt/sources.list.d/jitsi-stable.list > /dev/null
+
+# open ports
+ufw allow 22/tcp &&
+ufw allow 80/tcp &&
+ufw allow 443/tcp &&
+ufw allow 10000/udp &&
+ufw allow 22/tcp &&
+ufw allow 3478/udp &&
+ufw allow 5349/tcp &&
+ufw allow 5222/tcp &&
+printf 'y'|ufw enable
+
+#CREATE CERTS for IP - FQDN
+openssl req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout /etc/ssl/$FQDN.key -out  /etc/ssl/$FQDN.pem -subj "/C=US/CN=Example-Root-CA" &&
+openssl x509 -outform pem -in /etc/ssl/$FQDN.pem -out /etc/ssl/$FQDN.crt &&
+
+# Install JITSI
+apt update &&
+echo "--------------------------- INSTALLING JITSI-MEET ---------------------------"
+sleep 3
+echo "--------------------------- Remember to choose self signed certs ---------------------------"
+sleep 3
+apt install jitsi-meet -y &&
+
+# setup jitsi tokens
+cd &&
+apt-get update -y &&
+apt-get install gcc -y &&
+apt-get install unzip -y &&
+apt-get install lua5.2 -y &&
+apt-get install liblua5.2 -y &&
+apt-get install luarocks -y &&
+luarocks install basexx &&
+apt-get install libssl1.0-dev -y &&
+luarocks install luacrypto &&
+mkdir src &&
+cd src &&
+luarocks download lua-cjson &&
+luarocks unpack lua-cjson-2.1.0.6-1.src.rock &&
+cd lua-cjson-2.1.0.6-1/lua-cjson &&
+sed -i ‘s/lua_objlen/lua_rawlen/g’ lua_cjson.c &&
+sed -i ‘s|$(PREFIX)/include|/usr/include/lua5.2|g’ Makefile &&
+luarocks make &&
+luarocks install luajwtjitsi &&
+cd &&
+wget https://prosody.im/files/prosody-debian-packages.key -O- | sudo apt-key add – &&
+echo deb http://packages.prosody.im/debian $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list &&
+apt-get update -y &&
+apt-get upgrade -y &&
+apt-get install prosody -y &&
+chown root:prosody /etc/prosody/certs/$FQDN.key &&
+chmod 644 /etc/prosody/certs/$FQDN.key &&
+sleep 2 &&
+
+#Copy generadet CERTS to prosody
+echo "--------------------------- Copy generadet CERTS to prosody ---------------------------"
+sleep 3
+cp /etc/ssl/$FQDN.crt /etc/prosody/certs/$FQDN.crt
+cp /etc/ssl/$FQDN.key /etc/prosody/certs/$FQDN.key
+
+## install jitsi tokens for real
+echo "--------------------------- INSTALLING JITSI-MEET-TOKENS ---------------------------"
+sleep 3
+echo "--------------------------- Remember app_id and secret ---------------------------"
+sleep 3
+apt-get install jitsi-meet-tokens -y
+
+done
+done
+
