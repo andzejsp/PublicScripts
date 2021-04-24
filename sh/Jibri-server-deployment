@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Check if root
+if [ `whoami` != 'root' ]
+  then
+    echo "You must be root to do this."
+    exit
+fi
+
+# Check if ALSA and Loopback Device is good
+
+echo "snd-aloop" >> /etc/modules
+modprobe snd-aloop
+lsmod | grep snd_aloop
+
+# Ffmpeg with X11 capture support
+add-apt-repository ppa:mc3man/trusty-media  &&
+apt-get update 
+apt-get install ffmpeg -y &&
+
+# Google Chrome stable & Chromedriver
+curl https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg' &&
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > sudo tee /etc/apt/sources.list.d/google-chrome.list &&
+apt-get -y update &&
+apt-get -y install google-chrome-stable &&
+mkdir -p /etc/opt/chrome/policies/managed &&
+echo '{ "CommandLineFlagSecurityWarningsEnabled": false }' >>/etc/opt/chrome/policies/managed/managed_policies.json &&
+
+# Chromedriver is also required and can be installed like so:
+CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`
+wget -N http://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip -P ~/
+unzip ~/chromedriver_linux64.zip -d ~/
+rm ~/chromedriver_linux64.zip
+mv -f ~/chromedriver /usr/local/bin/chromedriver
+chown root:root /usr/local/bin/chromedriver
+chmod 0755 /usr/local/bin/chromedriver
+
+# Miscellaneous required tools
+apt-get install default-jre-headless ffmpeg curl alsa-utils icewm xdotool xserver-xorg-input-void xserver-xorg-video-dummy -y &&
+
+# Jitsi debian repo
+curl https://download.jitsi.org/jitsi-key.gpg.key | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/jitsi-keyring.gpg' &&
+echo 'deb [signed-by=/usr/share/keyrings/jitsi-keyring.gpg] https://download.jitsi.org stable/' | sudo tee /etc/apt/sources.list.d/jitsi-stable.list > /dev/null
+
+# Install the latest jibri
+apt-get update 
+apt-get install jibri -y
+
+# User, group
+usermod -aG adm,audio,video,plugdev jibri
+
+# Config files
+#/etc/jitsi/jibri/jibri.conf
+
+
+echo "--------------------------- Script completed ---------------------------"

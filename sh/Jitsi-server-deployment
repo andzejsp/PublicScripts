@@ -6,7 +6,15 @@ if [ `whoami` != 'root' ]
     echo "You must be root to do this."
     exit
 fi
+
+# Check if openssl is installed
+if [ $(dpkg-query -W -f='${Status}' openssl 2>/dev/null | grep -c "ok installed") -eq 0 ];
+then
+  apt-get install openssl -y
+fi
+
 # Set user CVARS
+echo
 echo "--------------------------- Set user CVARS ---------------------------"
 sleep 3
 # Get user FQDN 
@@ -14,27 +22,15 @@ FQDN=$(whiptail --nocancel --title "Enter FQDN or ip" --inputbox "Enter your FQD
 # Do a quick check
 if [ -z "$FQDN" ]
 then
+      echo
       echo "FQDN  was empty - Exit"
 	  exit
 fi
 
-# Get user jitsi token app-id
-JAPPID=$(whiptail --nocancel --title "Enter Jitsi-token APP ID " --inputbox "Enter Jitsi-token APP ID  to use for this machine" 10 60 3>&1 1>&2 2>&3)
-# Do a quick check
-if [ -z "$JAPPID" ]
-then
-      echo "Jitsi-Token-App-id  was empty - Exit"
-	  exit
-fi
-
-# Get user jitsi token app-secret
-JSECRET=$(whiptail --nocancel --title "Enter Jitsi-token APP secret" --inputbox "Enter Jitsi-token APP secret to use for this machine" 10 60 3>&1 1>&2 2>&3)
-# Do a quick check
-if [ -z "$JSECRET" ]
-then
-      echo "Jitsi-Token-App-secret was empty - Exit"
-	  exit
-fi
+# Set user jitsi token app-id
+JAPPID="jitsi-app-id"
+# Set user jitsi token app-secret
+JSECRET=$(openssl rand -hex 32)
 
 # set DEBCONFS with CVARS
 echo "jitsi-videobridge jitsi-videobridge/jvb-hostname string $FQDN" | debconf-set-selections
@@ -63,6 +59,7 @@ ufw allow 5222/tcp &&
 printf 'y'|ufw enable
 
 #CREATE CERTS for IP - FQDN
+echo
 echo "--------------------------- GENERATE my own certs ---------------------------"
 sleep 3
 
@@ -71,12 +68,14 @@ openssl x509 -outform pem -in /etc/ssl/$FQDN.pem -out /etc/ssl/$FQDN.crt &&
 
 # Install JITSI
 apt update &&
+echo
 echo "--------------------------- INSTALLING JITSI-MEET with my own certs ---------------------------"
 sleep 3
 
 apt install jitsi-meet -y &&
 
 # Install lua stuff and prosody
+echo
 echo "--------------------------- Install lua stuff and prosody ---------------------------"
 sleep 3
 
@@ -110,16 +109,24 @@ chmod 644 /etc/prosody/certs/$FQDN.key &&
 sleep 2 &&
 
 #Copy generadet CERTS to prosody
+echo
 echo "--------------------------- Copy generated CERTS to prosody ---------------------------"
 sleep 3
 cp /etc/ssl/$FQDN.crt /etc/prosody/certs/$FQDN.crt
 cp /etc/ssl/$FQDN.key /etc/prosody/certs/$FQDN.key
 
 ## install jitsi tokens for real
+echo
 echo "--------------------------- INSTALLING JITSI-MEET-TOKENS ---------------------------"
 sleep 3
 
 apt-get install jitsi-meet-tokens -y
-
+echo
 echo "--------------------------- Script completed ---------------------------"
+echo
+echo "Jitsi-meet server IP:      $FQDN"
+echo
+echo "Jitsi-meet-JWT app-id:     $JAPPID"
+echo "Jitsi-meet-JWT Secret:     $JSECRET"
+echo
 
