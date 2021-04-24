@@ -55,6 +55,8 @@ usermod -aG adm,audio,video,plugdev jibri
 
 # Config files
 #/etc/jitsi/jibri/jibri.conf
+systemctl restart jibri
+
 clear
 
 systemctl status jibri
