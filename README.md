@@ -12,3 +12,5 @@ Just a reminder for myself
   - `curl -s https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jitsi-server-deployment |bash`
 2. Mattermost server
   - `curl -s https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Mattermost-omnibus-server-deployment |bash`
+3. Jibri server
+  - ` curl -s https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jibri-server-deployment |Bash`
