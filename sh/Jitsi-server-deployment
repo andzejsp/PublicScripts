@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script name, description
+SCRIPTNAMEDESCRIPTION="Jitsi-meet server deployment shellscript."
+
 # Check if root
 if [ `whoami` != 'root' ]
   then
@@ -121,8 +124,13 @@ echo "--------------------------- INSTALLING JITSI-MEET-TOKENS -----------------
 sleep 3
 
 apt-get install jitsi-meet-tokens -y
+clear
+
+echo
+systemctl status jitsi-videobridge2 jicofo prosody --no-pager
 echo
 echo "--------------------------- Script completed ---------------------------"
+echo "$SCRIPTNAMEDESCRIPTION"
 echo
 echo "Jitsi-meet server IP:      $FQDN"
 echo

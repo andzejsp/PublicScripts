@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script name, description
+SCRIPTNAMEDESCRIPTION="Mattermos-omnibus server deployment shellscript."
+
 # Check if root
 if [ `whoami` != 'root' ]
   then
@@ -55,9 +58,12 @@ echo "--------------------------- Restart mattermost-omnibus -------------------
 sleep 3
 
 mmomni reconfigure
+clear 
 
+mmomni status
 echo 
 echo "--------------------------- Script completed ---------------------------"
+echo "$SCRIPTNAMEDESCRIPTION"
 echo
 echo "Mattermost-omnibus server IP:                 $FQDN"
 echo

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script name, description
+SCRIPTNAMEDESCRIPTION="Jibri server deployment shellscript."
+
 # Check if root
 if [ `whoami` != 'root' ]
   then
@@ -8,23 +11,20 @@ if [ `whoami` != 'root' ]
 fi
 
 # Check if ALSA and Loopback Device is good
+echo "snd_aloop" >>/etc/modules
+modprobe snd_aloop
+#echo "snd-aloop" >> /etc/modules
+#modprobe snd-aloop
+#lsmod | grep snd_aloop
 
-echo "snd-aloop" >> /etc/modules
-modprobe snd-aloop
-lsmod | grep snd_aloop
-
-# Ffmpeg with X11 capture support
-add-apt-repository ppa:mc3man/trusty-media  &&
-apt-get update 
-apt-get install ffmpeg -y &&
+# Install the required packages that are available from Debian 10's default repositories:
+apt install linux-image-amd64 ffmpeg curl unzip software-properties-common -y
 
 # Google Chrome stable & Chromedriver
-curl https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg' &&
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > sudo tee /etc/apt/sources.list.d/google-chrome.list &&
-apt-get -y update &&
-apt-get -y install google-chrome-stable &&
-mkdir -p /etc/opt/chrome/policies/managed &&
-echo '{ "CommandLineFlagSecurityWarningsEnabled": false }' >>/etc/opt/chrome/policies/managed/managed_policies.json &&
+curl https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/google-chrome-keyring.gpg' 
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > sudo tee /etc/apt/sources.list.d/google-chrome.list 
+apt-get -y update 
+apt-get -y install google-chrome-stable 
 
 # Chromedriver is also required and can be installed like so:
 CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`
@@ -35,11 +35,14 @@ mv -f ~/chromedriver /usr/local/bin/chromedriver
 chown root:root /usr/local/bin/chromedriver
 chmod 0755 /usr/local/bin/chromedriver
 
+mkdir -p /etc/opt/chrome/policies/managed 
+echo '{ "CommandLineFlagSecurityWarningsEnabled": false }' >>/etc/opt/chrome/policies/managed/managed_policies.json 
+
 # Miscellaneous required tools
-apt-get install default-jre-headless ffmpeg curl alsa-utils icewm xdotool xserver-xorg-input-void xserver-xorg-video-dummy -y &&
+apt-get install default-jre-headless ffmpeg curl alsa-utils icewm xdotool xserver-xorg-input-void xserver-xorg-video-dummy -y 
 
 # Jitsi debian repo
-curl https://download.jitsi.org/jitsi-key.gpg.key | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/jitsi-keyring.gpg' &&
+curl https://download.jitsi.org/jitsi-key.gpg.key | sudo sh -c 'gpg --dearmor > /usr/share/keyrings/jitsi-keyring.gpg' 
 echo 'deb [signed-by=/usr/share/keyrings/jitsi-keyring.gpg] https://download.jitsi.org stable/' | sudo tee /etc/apt/sources.list.d/jitsi-stable.list > /dev/null
 
 # Install the latest jibri
@@ -49,8 +52,14 @@ apt-get install jibri -y
 # User, group
 usermod -aG adm,audio,video,plugdev jibri
 
+
 # Config files
 #/etc/jitsi/jibri/jibri.conf
+clear
 
-
+systemctl status jibri
+echo
 echo "--------------------------- Script completed ---------------------------"
+echo "$SCRIPTNAMEDESCRIPTION"
+echo
+echo
