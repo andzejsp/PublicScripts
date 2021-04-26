@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Sends notifications to Mattermost
+
+webhook_url="<INCOMMING WEBHOOK URL>"
+channel_name="town-square"
+user_name="<BOT USERNAME>"
+icon_url="<ICON URL>"
+post_data="<POST TEXT>"
+
+# Generate JSON data
+generate_post_data()
+{
+  cat <<EOF
+{
+  "channel": "$channel_name",
+  "username": "$user_name",
+  "icon_url": "icon_url",
+  "text": "$post_data"
+
+}
+EOF
+}
+
+# Sends POST to Mattermost
+curl -i -X POST -H 'Content-Type: application/json' --data "$(generate_post_data)" $webhook_url
