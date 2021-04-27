@@ -42,7 +42,7 @@ As seen on [RedHat](https://access.redhat.com/documentation/en-us/red_hat_enterp
 
 Procedure B.3. Creating an isolated network with libvirt
 
-1. Add and save the following XML in the /tmp/isolated.xml file. If the 192.168.254.0/24 network is already in use elsewhere on your network, you can choose a different network.
+1. Add and save the following XML in the ` /tmp/isolated.xml ` file on HOST. If the 192.168.254.0/24 network is already in use elsewhere on your network, you can choose a different network.
 ```
 <network>
   <name>isolated</name>
@@ -53,10 +53,10 @@ Procedure B.3. Creating an isolated network with libvirt
   </ip>
 </network>
 ```
-2. Create the network with this command: virsh net-define /tmp/isolated.xml
+2. Create the network with this command: ` virsh net-define /tmp/isolated.xml `, on HOST machine
 3. Set the network to autostart with the virsh net-autostart isolated command.
-4. Start the network with the virsh net-start isolated command.
-5. Using `virsh edit name_of_guest`, edit the configuration of each guest that uses macvtap for its network connection and add a new <interface> in the <devices> section similar to the following (note the <model type='virtio'/> line is optional to include):
+4. Start the network with the ` virsh net-start isolated ` command.
+5. Using ` virsh edit name_of_guest `, edit the configuration of each guest that uses macvtap for its network connection and add a new ` <interface> ` in the ` <devices> ` section similar to the following (note the <model type='virtio'/> line is optional to include):
 ```
 <interface type='network'>
   <source network='isolated'/>
