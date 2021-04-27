@@ -65,4 +65,4 @@ Procedure B.3. Creating an isolated network with libvirt
 ```
 6. Shut down, then restart each of these guests.
 
-The guests are now able to reach the host at the address <span style="color:red">**192.168.254.1**</span>, and the host will be able to reach the guests at the IP address they acquired from DHCP (alternatively, you can manually configure the IP addresses for the guests). Since this new network is isolated to only the host and guests, all other communication from the guests will use the macvtap interface.
+The guests are now able to reach the host at the address **192.168.254.1**, and the host will be able to reach the guests at the IP address they acquired from DHCP (alternatively, you can manually configure the IP addresses for the guests). Since this new network is isolated to only the host and guests, all other communication from the guests will use the macvtap interface.
