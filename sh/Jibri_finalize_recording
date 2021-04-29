@@ -1,0 +1,108 @@
+#!/usr/bin/bash
+
+# This script is for posting a message with participants and recording on mattermost channel using incomming webhook as guest user
+
+# Be sure to CHMOD +x this file in order for jibri to execute it
+# Make sure to replace <xxxx> values with your own values
+# $1 is the /srv/recordings/xxxx folder defined in /etc/jitsi/jibri/config.conf file
+
+###------------------------------------------------------------
+### NEED to HAVE installed
+### - apt install jq
+### - apt install moreutils  --> to use ts command
+###------------------------------------------------------------
+
+# Main recording var
+RCD_LOCATION=$1
+
+sleep 2
+
+# Mattermost CVARS
+## Mattermost api url - http://your.domain.com/api/v4
+MMAPI_URL='http://192.168.254.1/api/v4'
+
+## Mattermost bot token to be able to login and fetch userdata
+MMBOT_TOKEN='<token>'
+
+# CVARS
+## Date 
+DAT=$(date +"%d.%m.%Y | %T")
+
+## Jibri recording server that is accesible from web so that you can download the .mp4 file - http://your.domain.com
+JIBR_SRV_HOST_URL="<http://your.domain.com>"
+
+## Get Files from the recording folder
+RECORDINGS_DIR=$(basename -s '/' $RCD_LOCATION)
+VIDEO_FILE_DIR=$(find $RCD_LOCATION -name '*.mp4')
+VIDEO_FILE=$(basename -s '/' $VIDEO_FILE_DIR)
+MANIFEST_FILE_DIR=$(find $RCD_LOCATION -name '*.json')
+MANIFEST_FILE=$(basename -s '/' $MANIFEST_FILE_DIR)
+URL_TO_RECORDING=$(echo $JIBR_SRV_HOST_URL/$RECORDINGS_DIR/$VIDEO_FILE)
+
+## Gets meeting url from manifest.json
+MEETING_URL=$(jq -r '.meeting_url' $MANIFEST_FILE_DIR)
+
+## Get only the meetingname - Jitsi meeting ID
+MEETING_NAME=$(echo $MEETING_URL | cut -d'/' -f4- )
+
+## Gets list of participants from manifest.json
+PARTICIPANTS_NAME=$(jq -r '.participants[] | .user | .name' $MANIFEST_FILE_DIR)
+PARTICIPANTS_ID=$(jq -r '.participants[] | .user | .id' $MANIFEST_FILE_DIR)
+
+## Gets formated usernames from PARTICIPANTS_ID
+
+### Function to get usernames
+Get_formated_usernames()
+{
+for usr in $PARTICIPANTS_ID
+do
+  curl -s -H 'authorization: Bearer '$MMBOT_TOKEN $MMAPI_URL/users/$usr | jq -r '.username' | ts '@' | tr -d ' '
+done
+}
+
+## Set usernames into a one string
+PARTICIPANTS_USERNAME_FORMATED="$(Get_formated_usernames | awk '{ printf("%s ", $0) }')"
+
+## Locales for message constructor
+MEETING_LOCALE="Meeting"
+PARTICIPANTS_LOCALE="Participants"
+DOWNLOAD_LOCALE="Download recording here"
+
+## Loacales for card constructor
+INFO_LOCALE="Information"
+MEETING_ID="Meeting ID"
+
+## Message constructor
+T_BUILDER="#### #"$MEETING_LOCALE": "$DAT"\n\n"$PARTICIPANTS_LOCALE": "$PARTICIPANTS_USERNAME_FORMATED"\n\n"$DOWNLOAD_LOCALE": [:open_file_folder:]("$URL_TO_RECORDING")\n\n---"
+
+## Card constructor
+C_BUILDER="## "$INFO_LOCALE"\n---\n##### "$MEETING_ID": *"$MEETING_NAME"*\n##### "$PARTICIPANTS_LOCALE": "$PARTICIPANTS_USERNAME_FORMATED"\n"
+
+# Incomming Webhook constructor
+webhook_url="<mattermost incomming webhook url>"
+channel="town-square" # Default channel
+username="<Guest bot user name>"
+icon_url="<img url>"
+card=${C_BUILDER}
+text=${T_BUILDER}
+
+## Create Webhook data object
+Generate_post_data()
+{
+  cat <<EOF
+{
+  "channel": "$channel",
+  "username": "$username",
+  "text": "$text",
+  "icon_url": "$icon_url",
+     "props": {
+    "card": "$card"
+
+  }
+
+}
+EOF
+}
+
+# Sends a webhook to mattermost
+curl -i -X POST -H 'Content-Type: application/json' --data "$(Generate_post_data)" $webhook_url
