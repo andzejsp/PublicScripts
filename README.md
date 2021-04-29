@@ -34,7 +34,11 @@ Then apply the plan
   - `curl -s https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Mattermost-omnibus-server-deployment |bash`
 3. Jibri server
   - ` curl -s https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jibri-server-deployment |bash`
-
+  - Some finalize_recording scripts to download, that post a message on mattermost channel. Be sure to ` cd /srv/ ` before you ` curl `  and ` nano finalize_recording.sh ` before you deploy jibri:
+    - For *incomming webhooks* use this sample:
+      -` curl -o finalize_recording_webhook.sh https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jibri_finalize_recording_webhook `
+    - For bot accounts use this sample:
+      -` curl -o finalize_recording_bot.sh https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jibri_finalize_recording_bot `
 
 # Virtualization using KVM libvirt - HOST -> GUEST networking
 
