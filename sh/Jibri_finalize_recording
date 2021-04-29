@@ -3,11 +3,12 @@
 # This script is for posting a message with participants and recording on mattermost channel using incomming webhook as guest user
 
 # Be sure to CHMOD +x this file in order for jibri to execute it
-# Make sure to replace <xxxx> values with your own values
+# Make sure to replace <xxxx> values with your own values, without ofcourse <>
 # $1 is the /srv/recordings/xxxx folder defined in /etc/jitsi/jibri/config.conf file
 
 ###------------------------------------------------------------
 ### NEED to HAVE installed
+### - mattermost
 ### - apt install jq
 ### - apt install moreutils  --> to use ts command
 ###------------------------------------------------------------
@@ -19,7 +20,7 @@ sleep 2
 
 # Mattermost CVARS
 ## Mattermost api url - http://your.domain.com/api/v4
-MMAPI_URL='http://192.168.254.1/api/v4'
+MMAPI_URL='<http://your.domain.com/api/v4>'
 
 ## Mattermost bot token to be able to login and fetch userdata
 MMBOT_TOKEN='<token>'
