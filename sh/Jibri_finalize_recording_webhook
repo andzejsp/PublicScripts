@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 # This script is for posting a message with participants and recording on mattermost channel using incomming webhook as guest user
+# This script allows only for local files to be shared. Nginx must be configured to share the /recordings/ folder on th web
 
 # Be sure to CHMOD +x this file in order for jibri to execute it
 # Make sure to replace <xxxx> values with your own values, without ofcourse <>
