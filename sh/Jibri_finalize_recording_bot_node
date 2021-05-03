@@ -54,12 +54,14 @@ do
 	echo "$NJF_PATH/$NJF_NAME.mp4"
     echo "---------------------------"
 	sleep 1
+	if [ $i = $count ]; then
+	  break
+	fi
 fi
 done
 
 # Last check if recorded file exists - if not then exit script
 if [ -e $NJF_PATH/$NJF_NAME.mp4 ]; then
-break
   else
     echo "---------------------------"
     echo "File cannot be found - exiting"
