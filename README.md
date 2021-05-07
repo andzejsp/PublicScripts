@@ -24,7 +24,7 @@ network:
 Then apply the plan
 
 `netplan apply`
-
+---
 # Local test server scripts
 ### Servers without domain or SSL/ with local-network self signed certs
 
@@ -43,7 +43,7 @@ Then apply the plan
       ```
       curl -o finalize_recording_bot.sh https://raw.githubusercontent.com/andzejsp/PublicScripts/main/sh/Jibri_finalize_recording_bot
       ```
-
+---
 # Virtualization using KVM libvirt - HOST -> GUEST networking
 
 As seen on [RedHat](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/virtualization_host_configuration_and_guest_installation_guide/app_macvtap)
@@ -74,3 +74,12 @@ Procedure B.3. Creating an isolated network with libvirt
 6. Shut down, then restart each of these guests.
 
 The guests are now able to reach the host at the address **192.168.254.1**, and the host will be able to reach the guests at the IP address they acquired from DHCP (alternatively, you can manually configure the IP addresses for the guests). Since this new network is isolated to only the host and guests, all other communication from the guests will use the macvtap interface.
+---
+# Mattermost and Rasa integration
+To connect your Rasa bot to mattermost you have to have these in your rasa bot credentials.yml:
+```
+mattermost:
+  url: "http://mattermost server/api/v4"
+  token: "bot token not token ID"
+  webhook_url: "http://rasa x server:5005/webhooks/mattermost/webhook" # and this has to be set up in mattermost integrations as outgoing webhook and (Callback URLs (One Per Line)) must match the rasa x ip but the port has to be for some unknown reason 5005 not 5002
+```
