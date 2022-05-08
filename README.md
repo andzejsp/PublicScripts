@@ -91,7 +91,7 @@ mattermost:
 ---
 
 # Nginx Proxy Manager - custom location Setup
-Adding custom location for Portainer
+Adding custom location for Portainer and Pi-hole in the Advanced tab
 
 ```
 	location /portainer {
