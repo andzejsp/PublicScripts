@@ -107,5 +107,12 @@ Adding custom location for Portainer
 		proxy_set_header Connection 'upgrade';
 		proxy_http_version 1.1;
 	}
+	
+	location /pi-hole {
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_pass http://pi-hole/admin/;
+		proxy_http_version 1.1;
+		proxy_set_header Connection "";
+	}
 
 ```
