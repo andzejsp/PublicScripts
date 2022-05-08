@@ -88,3 +88,24 @@ mattermost:
   token: "bot token not token ID"
   webhook_url: "http://rasa x server:5005/webhooks/mattermost/webhook" # and this has to be set up in mattermost integrations as outgoing webhook and (Callback URLs (One Per Line)) must match the rasa x ip but the port has to be for some unknown reason 5005 not 5002
 ```
+---
+
+# Nginx Proxy Manager - custom location Setup
+Adding custom location for Portainer
+
+```
+	location /portainer {
+		rewrite ^/portainer(/.*)$ /$1 break;
+		proxy_pass http://portainer:9000/;
+		proxy_http_version 1.1;
+		proxy_set_header Connection "";
+	}
+
+	location /portainer/api {
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_pass http://portainer:9000/api;
+		proxy_set_header Connection 'upgrade';
+		proxy_http_version 1.1;
+	}
+
+```
